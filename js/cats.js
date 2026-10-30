@@ -1,13 +1,16 @@
 import * as THREE from 'three';
+import {ringRoad} from './island.js';
 const m=c=>new THREE.MeshStandardMaterial({color:c,roughness:1,flatShading:true});
 function ell(parent,rx,ry,rz,color,x,y,z){const obj=new THREE.Mesh(new THREE.SphereGeometry(1,8,6),m(color));obj.scale.set(rx,ry,rz);obj.position.set(x,y,z);obj.castShadow=true;parent.add(obj);return obj}
 // Each patrol stays on the island's flat ground and beside the visible roads.
 // Cat local coordinates start at paw level: Y=0 is the island surface.
-const routes={
- '小橘':[[-10,-18],[-17,-16],[-22,-13],[-15,-8],[-9,-7],[-15,-8],[-22,-13]],
- '阿灰':[[-24,0],[-23,8],[-18,15],[-12,10],[-7,7],[-12,10],[-18,15],[-23,8]],
- '小賓':[[-7,20],[4,21],[15,18],[11,10],[8,8],[11,10],[15,18],[4,21]]
-};
+// Cats share the precise ring-road vertices, so their route cannot drift off-road.
+// Separate starting positions prevent the three cats from bunching up.
+const ring = ringRoad.slice(0,-1);
+const startAt = {'小橘':13,'阿灰':3,'小賓':6};
+const routes=Object.fromEntries(Object.entries(startAt).map(([name,index])=>[
+ name, [...ring.slice(index),...ring.slice(0,index),ring[index]]
+]));
 function cat(name,color,speech){const group=new THREE.Group();const body=new THREE.Group();group.add(body);
  ell(body,.36,.32,.6,color,0,.53,0);ell(body,.3,.3,.31,color,0,.91,.43);for(const x of [-.18,.18])for(const z of [-.4,.37])ell(body,.115,.28,.12,color,x,.29,z);
  for(const x of [-.2,.2]){const ear=new THREE.Mesh(new THREE.ConeGeometry(.14,.31,3),m(color));ear.position.set(x,1.22,.47);ear.rotation.z=x>0?-.2:.2;body.add(ear)}
