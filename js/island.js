@@ -7,52 +7,43 @@ export function cone(parent,r,h,ns,color,x,y,z){const m=new THREE.Mesh(new THREE
 export function cylinder(parent,r,h,n,color,x,y,z){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,n),mat(color));m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m}
 function rand(seed){let t=seed;return()=>{t=(t*1664525+1013904223)>>>0;return t/4294967296}}
 const random=rand(245871);
-// Connected road network: a continuous ring road plus short access lanes.
-// Coordinates are X,Z on the flat island surface. Each spur begins EXACTLY
-// at a point on the ring; its far end is a paved turnaround, not an abrupt cut.
-export const ringRoad = [
- [-22,-13],[-24,-7],[-24,0],[-23,8],[-17,17],[-7,20],
- [4,21],[15,18],[23,10],[24,2],[21,-9],[15,-16],
- [3,-19],[-10,-18],[-22,-13]
-];
-export const accessRoads = [
- [[-24,0],[-22,0]],             // alumni village entrance
- [[-17,17],[-17,15]],         // student plaza
- [[15,18],[13,17]],           // administrative centre
- [[21,-9],[19,-9]],           // faculty building
- [[-10,-18],[-10,-15]]        // admissions access
-];
-export const roadRoutes = [ringRoad, ...accessRoads];
-const roadWidth=2.2;
-function distanceToSegment(x,z,a,b){const dx=b[0]-a[0],dz=b[1]-a[1];const t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz||1)));return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t)}
-export function nearRoad(x,z,padding=0){return roadRoutes.some(route=>route.some((p,i)=>i&&distanceToSegment(x,z,route[i-1],p)<roadWidth/2+padding))}
-function roadDisc(root,x,z,r,y,material){
- const disk=new THREE.Mesh(new THREE.CircleGeometry(r,18),material);
- disk.rotation.x=-Math.PI/2;disk.position.set(x,y,z);disk.receiveShadow=true;root.add(disk);
+// V1.3: one continuous, tidy perimeter promenade. No dangling spurs.
+// One shared centre-line is used for both pavement and cat patrols.
+const ROAD_RX=25.0, ROAD_RZ=19.7;
+export const ringRoad=Array.from({length:97},(_,i)=>{
+ const a=Math.PI*2*i/96;
+ return [ROAD_RX*Math.cos(a),ROAD_RZ*Math.sin(a)];
+});
+export const accessRoads=[];
+export const roadRoutes=[ringRoad];
+const roadWidth=1.75;
+function distanceToSegment(x,z,a,b){
+ const dx=b[0]-a[0],dz=b[1]-a[1];
+ const t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz||1)));
+ return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t);
 }
-function roadSegment(root,a,b,width,y,material){
- const dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);
- if(len<.001)return;
- const road=new THREE.Mesh(new THREE.PlaneGeometry(width,len),material);
- road.rotation.x=-Math.PI/2;
- // after plane rotation, local Y maps to world -Z
- road.rotation.z=0;
- road.rotation.order='YXZ';
- road.rotation.y=-Math.atan2(dx,dz);
- road.position.set((a[0]+b[0])/2,y,(a[1]+b[1])/2);
- road.receiveShadow=true;root.add(road);
+export function nearRoad(x,z,padding=0){return ringRoad.some((p,i)=>i&&distanceToSegment(x,z,ringRoad[i-1],p)<roadWidth/2+padding)}
+// Build horizontal ribbons explicitly in world X/Z; avoids plane rotation errors.
+function strip(root,points,width,y,color){
+ const verts=[],indices=[];
+ const n=points.length-1;
+ for(let i=0;i<n;i++){
+  const prev=points[(i-1+n)%n],next=points[(i+1)%n],p=points[i];
+  const dx=next[0]-prev[0],dz=next[1]-prev[1],len=Math.hypot(dx,dz);
+  const nx=-dz/len,nz=dx/len;
+  verts.push(p[0]+nx*width/2,y,p[1]+nz*width/2,p[0]-nx*width/2,y,p[1]-nz*width/2);
+ }
+ for(let i=0;i<n;i++){
+  const j=(i+1)%n,a=i*2,b=j*2;
+  indices.push(a,a+1,b,b,a+1,b+1);
+ }
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();
+ const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color,roughness:1,side:THREE.DoubleSide}));
+ mesh.receiveShadow=true;root.add(mesh);
 }
 function exportRoads(root){
- const layers=[{w:roadWidth+.38,y:.048,m:mat(0xcaa77b)},{w:roadWidth,y:.065,m:mat(0xf5e3c3)}];
- for(const layer of layers){
-  for(const route of roadRoutes){
-   for(let i=1;i<route.length;i++)roadSegment(root,route[i-1],route[i],layer.w,layer.y,layer.m);
-   // Rounded junctions also cover seams between straight segments.
-   for(const [x,z] of route)roadDisc(root,x,z,layer.w/2,layer.y+.001,layer.m);
-  }
-  // A circular turn-around at every terminal access lane; no mystery dead ends.
-  for(const route of accessRoads){const [x,z]=route[route.length-1];roadDisc(root,x,z,layer.w*.88,layer.y+.002,layer.m)}
- }
+ strip(root,ringRoad,roadWidth+.32,.12,0xc69d73);
+ strip(root,ringRoad,roadWidth,.145,0xf5e7d0);
 }
 export function createIsland(scene){const root=new THREE.Group();scene.add(root);
  const sea=new THREE.Mesh(new THREE.CircleGeometry(110,96),new THREE.MeshStandardMaterial({color:0x58bfd0,roughness:.42,metalness:.08}));sea.rotation.x=-Math.PI/2;sea.position.y=-2.65;sea.receiveShadow=true;root.add(sea);

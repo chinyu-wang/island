@@ -7,7 +7,7 @@ function ell(parent,rx,ry,rz,color,x,y,z){const obj=new THREE.Mesh(new THREE.Sph
 // Cats share the precise ring-road vertices, so their route cannot drift off-road.
 // Separate starting positions prevent the three cats from bunching up.
 const ring = ringRoad.slice(0,-1);
-const startAt = {'小橘':13,'阿灰':3,'小賓':6};
+const startAt = {'小橘':65,'阿灰':17,'小賓':37};
 const routes=Object.fromEntries(Object.entries(startAt).map(([name,index])=>[
  name, [...ring.slice(index),...ring.slice(0,index),ring[index]]
 ]));
@@ -17,13 +17,13 @@ function cat(name,color,speech){const group=new THREE.Group();const body=new THR
  for(const x of [-.125,.125])ell(body,.045,.057,.025,0x26353d,x,.98,.735);
  ell(body,.052,.035,.025,0xea9d9d,0,.83,.75);
  const tail=new THREE.Group();tail.position.set(0,.6,-.51);body.add(tail);ell(tail,.09,.1,.36,color,0,.08,-.27);ell(tail,.1,.12,.2,color,0,.18,-.53);
- const route=routes[name];group.position.set(route[0][0],.075,route[0][1]);group.userData.interact='cat:'+name;group.traverse(o=>o.userData.interact='cat:'+name);
- return{name,group,body,tail,route,routeIndex:0,direction:1,speech,state:'idle',time:1+Math.random()*2,target:new THREE.Vector3(route[1][0],.075,route[1][1]),speed:1.15+Math.random()*.35};
+ const route=routes[name];group.position.set(route[0][0],.15,route[0][1]);group.userData.interact='cat:'+name;group.traverse(o=>o.userData.interact='cat:'+name);
+ return{name,group,body,tail,route,routeIndex:0,direction:1,speech,state:'idle',time:1+Math.random()*2,target:new THREE.Vector3(route[1][0],.15,route[1][1]),speed:1.15+Math.random()*.35};
 }
 export function makeCats(root){const cats=[cat('小橘',0xe5a05c,['喵～歡迎來到觀光學院！','這座島上有好多好玩的地方喵～']),cat('阿灰',0x969fa6,['系友故事村好舒服，我要在這裡休息。','不要吵我，我正在研究貓咪觀光學。']),cat('小賓',0x343c42,['學生活動廣場最熱鬧！','今天想去機場搭飛機，喵～'])];for(const c of cats){if(c.name==='小賓'){ell(c.body,.18,.22,.31,0xffffff,0,.6,.27);ell(c.body,.13,.12,.12,0xffffff,0,.82,.65)}root.add(c.group)}return cats;}
 export function updateCats(cats,dt,t,enabled=true){for(const c of cats){c.group.visible=enabled;if(!enabled)continue;
  // Ground height is constant, even when moving, pausing or sitting.
- c.group.position.y=.075;
+ c.group.position.y=.15;
  c.time-=dt;
  if(c.state==='walk'){
   const dx=c.target.x-c.group.position.x,dz=c.target.z-c.group.position.z,dist=Math.hypot(dx,dz);
@@ -31,7 +31,7 @@ export function updateCats(cats,dt,t,enabled=true){for(const c of cats){c.group.
    c.routeIndex+=c.direction;
    if(c.routeIndex>=c.route.length-1){c.routeIndex=c.route.length-1;c.direction=-1}
    if(c.routeIndex<=0){c.routeIndex=0;c.direction=1}
-   const next=c.route[c.routeIndex+c.direction];c.target.set(next[0],.075,next[1]);
+   const next=c.route[c.routeIndex+c.direction];c.target.set(next[0],.15,next[1]);
    c.state='idle';c.time=.6+Math.random()*1.6;
   }else{
    const step=Math.min(dist,dt*c.speed),vx=dx/dist,vz=dz/dist;
