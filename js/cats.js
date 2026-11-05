@@ -20,7 +20,7 @@ function cat(name,color,speech){const group=new THREE.Group();const body=new THR
  const route=routes[name];group.position.set(route[0][0],.15,route[0][1]);group.userData.interact='cat:'+name;group.traverse(o=>o.userData.interact='cat:'+name);
  return{name,group,body,tail,route,routeIndex:0,direction:1,speech,state:'idle',time:1+Math.random()*2,target:new THREE.Vector3(route[1][0],.15,route[1][1]),speed:1.15+Math.random()*.35};
 }
-export function makeCats(root){const cats=[cat('小橘',0xe5a05c,['喵～歡迎來到觀光學院！','這座島上有好多好玩的地方喵～']),cat('阿灰',0x969fa6,['系友故事村好舒服，我要在這裡休息。','不要吵我，我正在研究貓咪觀光學。']),cat('小賓',0x343c42,['學生活動廣場最熱鬧！','今天想去機場搭飛機，喵～'])];for(const c of cats){if(c.name==='小賓'){ell(c.body,.18,.22,.31,0xffffff,0,.6,.27);ell(c.body,.13,.12,.12,0xffffff,0,.82,.65)}root.add(c.group)}return cats;}
+export function makeCats(root){const cats=[cat('小橘',0xe5a05c,['喵～歡迎來到靜宜觀光島！','這座島上有好多好玩的地方喵～']),cat('阿灰',0x969fa6,['系友故事村好舒服，我要在這裡休息。','不要吵我，我正在研究貓咪觀光學。']),cat('小賓',0x343c42,['學生活動廣場最熱鬧！','今天想去旅行，喵～'])];for(const c of cats){if(c.name==='小賓'){ell(c.body,.18,.22,.31,0xffffff,0,.6,.27);ell(c.body,.13,.12,.12,0xffffff,0,.82,.65)}root.add(c.group)}return cats;}
 export function updateCats(cats,dt,t,enabled=true){for(const c of cats){c.group.visible=enabled;if(!enabled)continue;
  // Ground height is constant, even when moving, pausing or sitting.
  c.group.position.y=.15;
