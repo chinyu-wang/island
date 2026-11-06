@@ -29,3 +29,11 @@
 - 沒有伺服器與帳號，紀錄只在同一瀏覽器、同一網站來源保留。
 - `榮耀殿堂` 及 `系友故事村` 的正式真實案例仍待核實，維持 V2.1 的主題探索形式。
 - 目前通過 JavaScript 語法及 ZIP 檔結構檢查；執行環境的瀏覽器限制本機頁面連線，尚未完成瀏覽器互動驗證。
+
+
+## V2.2.1 獎勵按鈕修正
+- 獎勵系統獨立載入，不再依賴 Three.js 場景完成初始化才可點擊。
+- 獎勵圖片預覽及下載加入錯誤提示，避免靜默失敗。
+- 更新 `index.html`、`js/main.js`、`js/rewards.js`、新增 `js/rewards-boot.js`、`css/style.css`。
+- 保留所有遊戲進度使用的 localStorage key，以及原有 cats.js 和 locations.js。
+- GitHub Pages 更新後請強制重新整理（Mac Chrome：Command + Shift + R）。

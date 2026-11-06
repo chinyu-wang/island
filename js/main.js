@@ -9,7 +9,6 @@ import {catClues} from './missions.js';
 import {initPassport} from './passport.js';
 import {initChallenges} from './challenges.js';
 import {audio} from './audio.js';
-import {initRewards} from './rewards.js';
 const $=s=>document.querySelector(s);
 audio.init();
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xbceaf0);scene.fog=new THREE.Fog(0xbceaf0,75,170);
@@ -24,8 +23,6 @@ function hidePanels(){for(const id of ['sidebar','detail','passport','cat-dialog
 function openNews(){hidePanels();$('#detail-icon').textContent='📣';$('#detail-en').textContent='LATEST NEWS';$('#detail-title').textContent='最新消息公告板';$('#detail-menu').textContent='動態消息';$('#detail-text').textContent='查看觀光系最新公告、活動與相關資訊，以官網更新為準。';const a=document.createElement('a');a.textContent='查看最新消息 ↗';a.href=newsUrl;a.target='_blank';a.rel='noopener noreferrer';$('#detail-links').replaceChildren(a);$('#detail-mission').replaceChildren();$('#detail').hidden=false;go(5,0)}
 const challenges=initChallenges(game,()=>audio.effect('success'));
 const passport=initPassport(game,locations,openDetail);
-const rewards=initRewards(game);
-document.querySelector('#passport-rewards').onclick=()=>rewards.open();
 let activeCat=null;
 function openCat(name){
  const c=cats.find(v=>v.name===name);if(!c)return;
