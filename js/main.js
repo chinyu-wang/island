@@ -9,6 +9,7 @@ import {catClues} from './missions.js';
 import {initPassport} from './passport.js';
 import {initChallenges} from './challenges.js';
 import {audio} from './audio.js';
+import {initRewards} from './rewards.js';
 const $=s=>document.querySelector(s);
 audio.init();
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xbceaf0);scene.fog=new THREE.Fog(0xbceaf0,75,170);
@@ -19,10 +20,12 @@ const ambient=new THREE.HemisphereLight(0xffffff,0x66838f,2.1);scene.add(ambient
 const labels=new Map();let showLabels=true,showCats=true;for(const a of anchors){const el=document.createElement('button');el.className='label';el.textContent=a.location.emoji+' '+a.location.name;el.addEventListener('click',()=>{audio.effect('click');openDetail(a.location.id)});$('#labels').append(el);labels.set(a.location.id,el)}
 const list=$('#locations-list');for(const l of locations){const btn=document.createElement('button');btn.className='location-item';const icon=document.createElement('span');icon.className='emoji';icon.textContent=l.emoji;const body=document.createElement('span');const b=document.createElement('b');b.textContent=l.name;const s=document.createElement('small');s.textContent=l.menu;body.append(b,s);btn.append(icon,body);btn.onclick=()=>{audio.effect('click');openDetail(l.id)};list.append(btn)}
 let flight=null;function go(x,z,top=false){const tgt=new THREE.Vector3(x,0,z);const pos=top?new THREE.Vector3(x+1,77,z+.1):new THREE.Vector3(x+28,31,z+33);flight={start:performance.now(),duration:850,fromC:camera.position.clone(),toC:pos,fromT:controls.target.clone(),toT:tgt}}
-function hidePanels(){for(const id of ['sidebar','detail','passport','cat-dialog','challenge'])$('#'+id).hidden=true}function openDetail(id){hidePanels();const l=locations.find(v=>v.id===id);if(!l)return;$('#detail-icon').textContent=l.emoji;$('#detail-en').textContent=l.en;$('#detail-title').textContent=l.name;$('#detail-menu').textContent=l.menu;$('#detail-text').textContent=l.description;const el=$('#detail-links');el.replaceChildren();for(const [label,url] of l.links){const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';el.append(a)}const mission=$('#detail-mission');mission.replaceChildren();const task=document.createElement('button');task.className='primary';task.textContent=game.hasPlace(id)?'🏅 已完成！再次挑戰 →':'🎮 開始地標挑戰 →';task.onclick=()=>{hidePanels();challenges.open(id);audio.effect('click')};mission.append(task);$('#detail').hidden=false;go(l.x,l.z)}
+function hidePanels(){for(const id of ['sidebar','detail','passport','cat-dialog','challenge','rewards'])$('#'+id).hidden=true}function openDetail(id){hidePanels();const l=locations.find(v=>v.id===id);if(!l)return;$('#detail-icon').textContent=l.emoji;$('#detail-en').textContent=l.en;$('#detail-title').textContent=l.name;$('#detail-menu').textContent=l.menu;$('#detail-text').textContent=l.description;const el=$('#detail-links');el.replaceChildren();for(const [label,url] of l.links){const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';el.append(a)}const mission=$('#detail-mission');mission.replaceChildren();const task=document.createElement('button');task.className='primary';task.textContent=game.hasPlace(id)?'🏅 已完成！再次挑戰 →':'🎮 開始地標挑戰 →';task.onclick=()=>{hidePanels();challenges.open(id);audio.effect('click')};mission.append(task);$('#detail').hidden=false;go(l.x,l.z)}
 function openNews(){hidePanels();$('#detail-icon').textContent='📣';$('#detail-en').textContent='LATEST NEWS';$('#detail-title').textContent='最新消息公告板';$('#detail-menu').textContent='動態消息';$('#detail-text').textContent='查看觀光系最新公告、活動與相關資訊，以官網更新為準。';const a=document.createElement('a');a.textContent='查看最新消息 ↗';a.href=newsUrl;a.target='_blank';a.rel='noopener noreferrer';$('#detail-links').replaceChildren(a);$('#detail-mission').replaceChildren();$('#detail').hidden=false;go(5,0)}
 const challenges=initChallenges(game,()=>audio.effect('success'));
 const passport=initPassport(game,locations,openDetail);
+const rewards=initRewards(game);
+document.querySelector('#passport-rewards').onclick=()=>rewards.open();
 let activeCat=null;
 function openCat(name){
  const c=cats.find(v=>v.name===name);if(!c)return;

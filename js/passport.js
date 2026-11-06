@@ -21,7 +21,7 @@ export function initPassport(game,locations,goToLocation){
    const placesGrid=$('#place-stamps');placesGrid.replaceChildren();
    for(const l of locations){const found=game.hasPlace(l.id),btn=document.createElement('button');btn.className='place-stamp '+(found?'collected':'');btn.textContent=(found?'🏅 ':'🔎 ')+l.name;btn.title=found?'已獲地標徽章，點擊可再次探索':'點擊前往地標並開始挑戰';btn.onclick=()=>{panel.hidden=true;goToLocation(l.id)};placesGrid.append(btn)}
    const award=$('#passport-award');const countPlaces=game.getPlaces().length;
-   award.textContent=count===10&&countPlaces===9?'🎉 十貓與九大地標全部完成！電子紀念證書將在 V2.2 開放。':count>=7&&countPlaces>=5?'🐾 已達成：觀光島探險家':count>=3&&countPlaces>=1?'🐾 已達成：觀光島見習生':`已探索 ${count} 隻貓咪、${countPlaces} 座地標。繼續前進吧！`;
+   award.textContent=count===10&&countPlaces===9?'🎉 十貓與九大地標全部完成！電子紀念證書與十貓全員集合圖卡已解鎖！':count>=7&&countPlaces>=5?'🐾 已達成：觀光島探險家':count>=3&&countPlaces>=1?'🐾 已達成：觀光島見習生':`已探索 ${count} 隻貓咪、${countPlaces} 座地標。繼續前進吧！`;
 
  };
  $('#btn-passport').onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden){document.querySelector('#sidebar').hidden=true;document.querySelector('#detail').hidden=true;draw()}};
