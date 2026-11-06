@@ -1,4 +1,4 @@
-import {activities} from './activities.js';
+import {activities} from './activities.js?v=20261106-quiz';
 const $=s=>document.querySelector(s);
 const node=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el};
 const button=(text,fn,cls='mission-option')=>{const b=node('button',cls,text);b.type='button';b.onclick=fn;return b};
@@ -6,14 +6,14 @@ export function initChallenges(game,onAward){
  const panel=$('#challenge'),body=$('#challenge-body');let active=null;
  $('#challenge-close').onclick=()=>panel.hidden=true;
  function open(id){const activity=activities[id];if(!activity)return;const questions=activity.questions?(activity.randomCount?[...activity.questions].sort(()=>Math.random()-.5).slice(0,activity.randomCount):activity.questions):null;
-  active={id,a:activity,questions,step:0,seen:new Set(),selected:new Set(),finished:false};$('#challenge-title').textContent=activity.title;panel.hidden=false;render();}
+  active={id,a:activity,questions,step:0,seen:new Set(),selected:new Set(),finished:false,replaying:false};$('#challenge-title').textContent=activity.title;panel.hidden=false;render();}
  function finish(){if(!active)return;active.finished=true;const fresh=game.stampPlace(active.id);if(fresh)onAward?.();render();}
  function render(){if(!active)return;const s=active,a=s.a;body.replaceChildren();const add=el=>body.append(el);
-  if(s.finished||game.hasPlace(s.id)){
+  if(s.finished||(game.hasPlace(s.id)&&!s.replaying)){
    add(node('div','mission-success','🏅 '+(s.finished?'闖關完成！':'這座地標的徽章已經收藏！')));
    add(node('p','mission-copy','恭喜取得「'+a.title+'」地標徽章。你可以繼續閱讀系網資訊，或重新體驗這個關卡。'));
    if(a.outro)add(node('p','mission-note',a.outro));
-   add(button('再玩一次',()=>{s.finished=false;s.step=0;s.seen.clear();s.selected.clear();render()},'mission-secondary'));
+   add(button('再玩一次',()=>{s.finished=false;s.replaying=true;s.step=0;s.lastCard=null;s.seen.clear();s.selected.clear();render()},'mission-secondary'));
    add(button('關閉，繼續探索',()=>panel.hidden=true,'primary'));return;
   }
   add(node('p','mission-copy',a.intro));
