@@ -4,6 +4,9 @@ import {locations,newsUrl} from '../data/locations.js';
 import {createIsland,clickable} from './island.js';
 import {createBuildings} from './buildings.js';
 import {makeCats,updateCats} from './cats.js';
+import {game} from './game.js';
+import {catClues} from './missions.js';
+import {initPassport} from './passport.js';
 const $=s=>document.querySelector(s);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xbceaf0);scene.fog=new THREE.Fog(0xbceaf0,75,170);
 const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,350);camera.position.set(49,51,59);
@@ -13,9 +16,28 @@ const ambient=new THREE.HemisphereLight(0xffffff,0x66838f,2.1);scene.add(ambient
 const labels=new Map();let showLabels=true,showCats=true;for(const a of anchors){const el=document.createElement('button');el.className='label';el.textContent=a.location.emoji+' '+a.location.name;el.addEventListener('click',()=>openDetail(a.location.id));$('#labels').append(el);labels.set(a.location.id,el)}
 const list=$('#locations-list');for(const l of locations){const btn=document.createElement('button');btn.className='location-item';const icon=document.createElement('span');icon.className='emoji';icon.textContent=l.emoji;const body=document.createElement('span');const b=document.createElement('b');b.textContent=l.name;const s=document.createElement('small');s.textContent=l.menu;body.append(b,s);btn.append(icon,body);btn.onclick=()=>openDetail(l.id);list.append(btn)}
 let flight=null;function go(x,z,top=false){const tgt=new THREE.Vector3(x,0,z);const pos=top?new THREE.Vector3(x+1,77,z+.1):new THREE.Vector3(x+28,31,z+33);flight={start:performance.now(),duration:850,fromC:camera.position.clone(),toC:pos,fromT:controls.target.clone(),toT:tgt}}
-function hidePanels(){for(const id of ['sidebar','detail'])$('#'+id).hidden=true}function openDetail(id){hidePanels();const l=locations.find(v=>v.id===id);if(!l)return;$('#detail-icon').textContent=l.emoji;$('#detail-en').textContent=l.en;$('#detail-title').textContent=l.name;$('#detail-menu').textContent=l.menu;$('#detail-text').textContent=l.description;const el=$('#detail-links');el.replaceChildren();for(const [label,url] of l.links){const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';el.append(a)}$('#detail').hidden=false;go(l.x,l.z)}
+function hidePanels(){for(const id of ['sidebar','detail','passport','cat-dialog'])$('#'+id).hidden=true}function openDetail(id){hidePanels();const l=locations.find(v=>v.id===id);if(!l)return;$('#detail-icon').textContent=l.emoji;$('#detail-en').textContent=l.en;$('#detail-title').textContent=l.name;$('#detail-menu').textContent=l.menu;$('#detail-text').textContent=l.description;const el=$('#detail-links');el.replaceChildren();for(const [label,url] of l.links){const a=document.createElement('a');a.textContent=label+' ↗';a.href=url;a.target='_blank';a.rel='noopener noreferrer';el.append(a)}$('#detail').hidden=false;go(l.x,l.z)}
 function openNews(){hidePanels();$('#detail-icon').textContent='📣';$('#detail-en').textContent='LATEST NEWS';$('#detail-title').textContent='最新消息公告板';$('#detail-menu').textContent='動態消息';$('#detail-text').textContent='查看觀光系最新公告、活動與相關資訊，以官網更新為準。';const a=document.createElement('a');a.textContent='查看最新消息 ↗';a.href=newsUrl;a.target='_blank';a.rel='noopener noreferrer';$('#detail-links').replaceChildren(a);$('#detail').hidden=false;go(5,0)}
-function openCat(name){const c=cats.find(c=>c.name===name);if(!c)return;const lines=c.speech;$('#cat-bubble').textContent='🐾 '+c.name+'：'+lines[Math.floor(Math.random()*lines.length)];$('#cat-bubble').hidden=false;clearTimeout(openCat.timer);openCat.timer=setTimeout(()=>$('#cat-bubble').hidden=true,4600)}
+const passport=initPassport(game,locations,openDetail);
+let activeCat=null;
+function openCat(name){
+ const c=cats.find(v=>v.name===name);if(!c)return;
+ hidePanels();activeCat=c;
+ const fresh=game.stampCat(name);
+ $('#cat-name').textContent='🐈 '+c.name;
+ $('#cat-stamp-message').textContent=fresh?'✨ 新發現！已取得 '+name+' 的貓咪印章！':'✅ 已收藏 '+name+' 的貓咪印章';
+ $('#cat-clue-text').hidden=true;$('#cat-go').hidden=true;
+ const talk=()=>{$('#cat-speech').textContent='「'+c.speech[Math.floor(Math.random()*c.speech.length)]+'」'};
+ $('#cat-talk').onclick=talk;talk();
+ $('#cat-clue').onclick=()=>{
+  const clue=catClues[name],loc=locations.find(l=>l.id===clue?.target);
+  $('#cat-clue-text').textContent=clue?clue.invite+' '+clue.clue:'繼續探索整座島吧！';
+  $('#cat-clue-text').hidden=false;$('#cat-go').hidden=!loc;
+  if(loc)$('#cat-go').onclick=()=>{openDetail(loc.id)};
+ };
+ $('#cat-dialog').hidden=false;
+}
+$('#cat-close').onclick=()=>$('#cat-dialog').hidden=true;
 $('#btn-list').onclick=()=>{const open=$('#sidebar').hidden;hidePanels();$('#sidebar').hidden=!open};$('#btn-help').onclick=()=>$('#modal').hidden=false;$('#modal-close').onclick=$('#btn-start').onclick=()=>$('#modal').hidden=true;for(const el of document.querySelectorAll('[data-close]'))el.onclick=()=>{$('#'+el.dataset.close).hidden=true};$('#btn-overview').onclick=()=>go(0,0);$('#btn-top').onclick=()=>go(0,0,true);$('#btn-labels').onclick=()=>{showLabels=!showLabels;$('#btn-labels').classList.toggle('active',showLabels);$('#labels').style.display=showLabels?'':'none'};$('#btn-cats').onclick=()=>{showCats=!showCats;$('#btn-cats').classList.toggle('active',showCats)};
 const themes={morning:{bg:0xffe7cd,light:0xffc899,intensity:2.4,amb:1.55},day:{bg:0xbceaf0,light:0xfff2d8,intensity:3,amb:2.1},dusk:{bg:0xe9b4bb,light:0xffa36d,intensity:1.8,amb:1.2},night:{bg:0x142b50,light:0x9db6ff,intensity:.65,amb:.95}};
 for(const b of document.querySelectorAll('[data-time]'))b.onclick=()=>{for(const n of document.querySelectorAll('[data-time]'))n.classList.toggle('active',n===b);const th=themes[b.dataset.time];scene.background.setHex(th.bg);scene.fog.color.setHex(th.bg);sun.color.setHex(th.light);sun.intensity=th.intensity;ambient.intensity=th.amb};
