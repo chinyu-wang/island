@@ -11,11 +11,6 @@
 - 保留 V2.1.1 既有音效、音樂、地標小遊戲與 10 貓集章。
 - 沿用 V2.1 進度 localStorage key `pu-tourism-island-v2-progress`，無需重新集章。
 
-## 更新方式
-解壓縮並上傳所有檔案覆蓋舊版。新增 `js/rewards.js`；變更 `index.html`, `css/style.css`, `js/main.js`, `js/passport.js`。保留原有 `js/audio.js`（V2.1.1 修正版）、`js/cats.js` 和 `data/locations.js`。
-
-若您在 GitHub 上再度修改過 `cats.js` 或 `locations.js`，建議只更新上面四個檔案與 `js/rewards.js`，避免覆蓋自己的改動。
-
 ## 測試建議
 1. 開啟「獎勵」確認 4 個獎勵預設鎖定，且能顯示尚缺的印章數量。
 2. 取得 3 貓／1 地標，開啟獎勵，下載小橘圖卡。
@@ -27,13 +22,3 @@
 - 獎勵圖片是 Canvas 原創插畫（依現有貓咪配色繪製），不依賴外部圖片來源。
 - 電子證書為遊戲紀念性質，非正式學習認證。
 - 沒有伺服器與帳號，紀錄只在同一瀏覽器、同一網站來源保留。
-- `榮耀殿堂` 及 `系友故事村` 的正式真實案例仍待核實，維持 V2.1 的主題探索形式。
-- 目前通過 JavaScript 語法及 ZIP 檔結構檢查；執行環境的瀏覽器限制本機頁面連線，尚未完成瀏覽器互動驗證。
-
-
-## V2.2.1 獎勵按鈕修正
-- 獎勵系統獨立載入，不再依賴 Three.js 場景完成初始化才可點擊。
-- 獎勵圖片預覽及下載加入錯誤提示，避免靜默失敗。
-- 更新 `index.html`、`js/main.js`、`js/rewards.js`、新增 `js/rewards-boot.js`、`css/style.css`。
-- 保留所有遊戲進度使用的 localStorage key，以及原有 cats.js 和 locations.js。
-- GitHub Pages 更新後請強制重新整理（Mac Chrome：Command + Shift + R）。
