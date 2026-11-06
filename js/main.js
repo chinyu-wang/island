@@ -7,7 +7,7 @@ import {makeCats,updateCats} from './cats.js';
 import {game} from './game.js';
 import {catClues} from './missions.js';
 import {initPassport} from './passport.js';
-import {initChallenges} from './challenges.js';
+import {initChallenges} from './challenges.js?v=20261106-quiz';
 import {audio} from './audio.js';
 const $=s=>document.querySelector(s);
 audio.init();
